@@ -2,7 +2,8 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v*", "*-v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,10 +22,10 @@ jobs:
         run: |
           mkdir -p dist
           if [ -f SKILL.md ]; then
-            python tools/package_skill.py --skill-path . --target claude --output dist --strict-public
+            python tools/package_skill.py --skill-path . --target hermes --output dist --strict-public
           else
             for p in skills/*/; do
-              python tools/package_skill.py --skill-path "$p" --target claude --output dist --strict-public
+              python tools/package_skill.py --skill-path "$p" --target hermes --output dist --strict-public
             done
           fi
       - name: Релизные заметки для пользователей

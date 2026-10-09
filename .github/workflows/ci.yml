@@ -28,7 +28,7 @@ jobs:
         run: |
           for p in ${{ steps.find.outputs.paths }}; do
             echo "::group::пакет $p"
-            python tools/package_skill.py --skill-path "$p" --target claude --check
+            python tools/package_skill.py --skill-path "$p" --target hermes --public-check --strict-public --check
             echo "::endgroup::"
           done
       - name: Синтаксис скриптов
