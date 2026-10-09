@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Зависимости
+        run: pip install pyyaml
+      - name: Собрать пакеты
+        run: |
+          mkdir -p dist
+          if [ -f SKILL.md ]; then
+            python tools/package_skill.py --skill-path . --target claude --output dist --strict-public
+          else
+            for p in skills/*/; do
+              python tools/package_skill.py --skill-path "$p" --target claude --output dist --strict-public
+            done
+          fi
+      - name: Релизные заметки для пользователей
+        run: |
+          f="docs/releases/${{ github.ref_name }}.md"
+          if [ ! -f "$f" ]; then
+            echo "Нет $f — напиши релизные заметки перед тегом (шаблон: docs/releases/_template.md)" >&2
+            exit 1
+          fi
+      - name: Приложить пакеты к релизу
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          body_path: docs/releases/${{ github.ref_name }}.md
+          generate_release_notes: false

@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Зависимости
+        run: pip install pyyaml
+      - name: Найти навыки
+        id: find
+        run: |
+          if [ -f SKILL.md ]; then
+            echo "paths=." >> $GITHUB_OUTPUT
+          else
+            echo "paths=$(ls -d skills/*/ 2>/dev/null | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          fi
+      - name: Валидация пакетов
+        run: |
+          for p in ${{ steps.find.outputs.paths }}; do
+            echo "::group::пакет $p"
+            python tools/package_skill.py --skill-path "$p" --target claude --check
+            echo "::endgroup::"
+          done
+      - name: Синтаксис скриптов
+        run: |
+          for d in ${{ steps.find.outputs.paths }}; do
+            [ -d "$d/scripts" ] && python -m compileall -q "$d/scripts" || true
+          done
+      - name: В индексе нет байт-кода и сборок
+        run: |
+          if git ls-files | grep -E '(__pycache__|\.pyc$|^dist/)'; then
+            echo "В репозитории байт-код или сборка — убери из индекса"; exit 1
+          fi
+      - name: Секреты (gitleaks)
+        run: |
+          if [ -f .gitleaks.toml ] || [ -d .git ]; then
+            docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect --source=/repo --no-git=false --exit-code 1 --verbose || true
+          fi

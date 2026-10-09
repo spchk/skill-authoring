@@ -1,0 +1,11 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Skill authoring",
+      "description": "Создать навык, упаковать, проверить на секреты и опубликовать: три контура хранения, версии и релизы, проверка требований до запуска.",
+      "skills": ["agency-skill-authoring"]
+    }
+  ]
+}

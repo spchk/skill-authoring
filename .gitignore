@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+.env
+.env.*
+!.env.example
+credentials.json
+*.pem
+*.key
+.DS_Store
+.pytest_cache/
+__pycache__/
